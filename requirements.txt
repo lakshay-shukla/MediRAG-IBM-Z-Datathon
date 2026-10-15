@@ -1,0 +1,9 @@
+streamlit
+google-generativeai
+chromadb
+pypdf
+pdfplumber
+pillow
+reportlab
+python-dotenv
+groq
