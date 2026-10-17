@@ -156,3 +156,53 @@ if groq_api_key:
                         st.error(f"System Error: {e}")
 
     st.markdown("---")
+
+    # ---------------------------------------------------------
+    # PART 2: GENERAL MEDICAL CHAT (RAG Enhanced)
+    # ---------------------------------------------------------
+    st.markdown("### 🧠 General Medical Query")
+    general_question = st.text_input("Ask a general medical question (e.g., What are the symptoms of Dengue?):")
+
+    if st.button("Ask General Question"):
+        if general_question:
+            with st.spinner("Searching knowledge base..."):
+                try:
+                    # RAG STEP: Search vector DB for general query
+                    rag_general_context = vector_db.search_medical_context(general_question, n_results=2)
+
+                    if selected_language == "Hindi":
+                        gen_lang = "Reply in pure Hindi."
+                    elif selected_language == "Hinglish":
+                        gen_lang = "Reply in Hinglish (Latin script)."
+                    else:
+                        gen_lang = "Reply in professional English."
+
+                    gen_prompt = f"""
+                    You are a helpful medical assistant using a RAG knowledge base. Answer the user's general medical question using the provided context and your expertise.
+                    {gen_lang}
+                    Include a disclaimer that you are an AI and they should consult a real doctor for serious issues.
+
+                    Retrieved Knowledge Base Context:
+                    {rag_general_context}
+
+                    Question: {general_question}
+                    """
+
+                    chat_completion = client.chat.completions.create(
+                        messages=[
+                            {"role": "system", "content": "You are a medical RAG assistant."},
+                            {"role": "user", "content": gen_prompt}
+                        ],
+                        model="openai/gpt-oss-20b",
+                    )
+
+                    answer = chat_completion.choices[0].message.content
+                    st.success("✅ **AI General Answer (RAG Powered):**")
+                    st.info(answer)
+
+                except Exception as e:
+                    st.error(f"System Error: {e}")
+        else:
+            st.warning("Please type a question first.")
+else:
+    st.error("Authentication Error: GROQ_API_KEY missing. Please check your .env configuration.")
