@@ -8,3 +8,4 @@ reportlab
 python-dotenv
 groq
 PyPDF2
+sentence-transformers
